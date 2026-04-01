@@ -105,22 +105,14 @@
     <p>Memuatkan...</p>
   </div>
 
-  <!-- App iframe — URL disimpan dalam config, bukan hardcode -->
-  <iframe id="appFrame" src="" allowfullscreen
+  <!-- App iframe -->
+  <iframe id="appFrame"
+    src="https://script.google.com/a/macros/moe-dl.edu.my/s/AKfycbx3WrEmO6aS7D5_U8_X_exO-4Y6ploWblDytgoX5Snb5HuWLXA0ZzZ-BeuBMfKfGddh/exec"
+    allowfullscreen
     allow="camera; microphone; clipboard-write"></iframe>
 
   <script>
-    // ── App config ──────────────────────────────────────────────
-    // URL dikodkan supaya tidak terdedah secara langsung dalam source
-    // Ini bukan enkripsi penuh, tapi menghalang pencarian mudah dalam repo
-    const _c = [
-      'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9hL21hY3Jvcy9tb2UtZGwuZWR1Lm15L3MvQUtmeWNieDNXckVtTzZhUzdENV9VOF9YX2V4Ty00WTZwbG9XYmxEeXRnb1g1U25iNUh1V0xYQTBaelotQmV1Qk1LZkdkZGgvZXhlYw=='
-    ];
-    const _url = atob(_c[0]);
-
-    // Set iframe src
     const frame = document.getElementById('appFrame');
-    frame.src = _url;
 
     // Hide splash once iframe loads
     frame.addEventListener('load', () => {
@@ -141,7 +133,7 @@
     // ── Service Worker ───────────────────────────────────────────
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/ptracker/sw.js')
+        navigator.serviceWorker.register('/ptracker/sw.js', { scope: '/ptracker/' })
           .then(r => console.log('[ptracker] SW registered:', r.scope))
           .catch(e => console.warn('[ptracker] SW failed:', e));
       });
