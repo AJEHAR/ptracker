@@ -1,13 +1,13 @@
 {
-  "name": "ptracker",
-  "short_name": "ptracker",
-  "description": "ptracker — Personal Tracker App",
+  "name": "pTracker",
+  "short_name": "pTracker",
+  "description": "Personal Tracker App",
   "start_url": "/ptracker/",
   "scope": "/ptracker/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#fdf6f0",
-  "theme_color": "#f9a8b8",
+  "theme_color": "#f472b6",
+  "background_color": "#fdf2f0",
   "icons": [
     {
       "src": "icon-192.png",
