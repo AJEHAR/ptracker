@@ -1,47 +1,136 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="pTracker">
-  <meta name="application-name" content="pTracker">
-  <meta name="theme-color" content="#e53e3e">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>pTracker</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Theme -->
+  <meta name="theme-color" content="#f472b6" />
+
+  <!-- iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="pTracker" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%; height: 100%;
-      background: #f1f5f9;
-      overflow: hidden;
-      touch-action: manipulation;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #fdf2f0;
+    }
+
+    #splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #fdf2f0 0%, #fce7f3 100%);
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    #splash img {
+      width: 110px;
+      height: 110px;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(244, 114, 182, 0.3);
+      margin-bottom: 20px;
+    }
+
+    #splash h1 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #be185d;
+      letter-spacing: 0.5px;
+    }
+
+    #splash p {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      color: #f9a8d4;
+      margin-top: 6px;
+    }
+
+    .spinner {
+      margin-top: 32px;
+      width: 32px;
+      height: 32px;
+      border: 3px solid #fce7f3;
+      border-top-color: #f472b6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     iframe {
       position: fixed;
       inset: 0;
-      width: 100vw;
-      height: 100dvh;
+      width: 100%;
+      height: 100%;
       border: none;
-      display: block;
+      background: #fdf2f0;
     }
   </style>
 </head>
 <body>
+
+  <!-- Splash Screen -->
+  <div id="splash">
+    <img src="icon-192.png" alt="pTracker Logo" />
+    <h1>pTracker</h1>
+    <p>Memuatkan...</p>
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App iframe -->
   <iframe
+    id="app"
     src="https://script.google.com/macros/s/AKfycbx3WrEmO6aS7D5_U8_X_exO-4Y6ploWblDytgoX5Snb5HuWLXA0ZzZ-BeuBMfKfGddh/exec"
-    allowfullscreen>
-  </iframe>
+    allow="camera; microphone; geolocation"
+    onload="hideSplash()"
+  ></iframe>
+
   <script>
+    // Hide splash when iframe loads
+    function hideSplash() {
+      const splash = document.getElementById('splash');
+      splash.style.opacity = '0';
+      setTimeout(() => splash.style.display = 'none', 500);
+    }
+
+    // Fallback: hide splash after 8s even if iframe is slow
+    setTimeout(hideSplash, 8000);
+
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/pTracker/sw.js')
-          .then(r => console.log('[ptracker] SW:', r.scope))
-          .catch(e => console.warn('[ptracker] SW fail:', e));
+        navigator.serviceWorker.register('/ptracker/sw.js', { scope: '/ptracker/' })
+          .then(reg => console.log('[SW] Registered:', reg.scope))
+          .catch(err => console.warn('[SW] Error:', err));
       });
     }
   </script>
+
 </body>
 </html>
