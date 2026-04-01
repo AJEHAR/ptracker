@@ -1,4 +1,3 @@
-// ptracker — Service Worker
 const CACHE_NAME = 'ptracker-v1';
 const STATIC_ASSETS = [
   '/ptracker/',
@@ -8,57 +7,41 @@ const STATIC_ASSETS = [
   '/ptracker/icon-512.png'
 ];
 
-// Domains to BYPASS (never cache — live data)
-const BYPASS_DOMAINS = [
-  'script.google.com',
-  'googleapis.com',
-  'accounts.google.com',
-  'moe-dl.edu.my'
-];
-
+// Install — cache static assets
 self.addEventListener('install', event => {
-  console.log('[ptracker SW] Installing...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[ptracker SW] Caching static assets');
-      return cache.addAll(STATIC_ASSETS);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
 });
 
+// Activate — clean old caches
 self.addEventListener('activate', event => {
-  console.log('[ptracker SW] Activating...');
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      )
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
+// Fetch — bypass GAS & Google APIs, serve others from cache
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
+  const url = event.request.url;
 
-  // Bypass GAS and Google API — always fetch live
-  if (BYPASS_DOMAINS.some(d => url.hostname.includes(d))) {
-    event.respondWith(fetch(event.request));
-    return;
+  // Bypass all Google/GAS requests — never cache live data
+  if (
+    url.includes('script.google.com') ||
+    url.includes('googleapis.com') ||
+    url.includes('google.com')
+  ) {
+    return; // Let browser handle normally
   }
 
   // Cache-first for static assets
   event.respondWith(
     caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (response && response.status === 200 && url.pathname.startsWith('/ptracker/')) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      }).catch(() => caches.match('/ptracker/index.html'));
+      return cached || fetch(event.request);
     })
   );
 });
